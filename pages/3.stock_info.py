@@ -10,8 +10,6 @@ import pandas as pd
 import FinanceDataReader as fdr
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
-import matplotlib 
-import koreanize_matplotlib
 
 # 캐싱: 인자가 바뀌지 않는 함수 실행 결과를 저장 후 재사용
 @st.cache_data
@@ -63,26 +61,29 @@ def sidebar_inputs() -> tuple[str, tuple[datetime.date, datetime.date], bool]:
     )
     st.sidebar.write(selected_dates)
     confirm_btn = st.sidebar.button('확인')
-	return company_name, selected_dates, confirm_btn
+    return company_name, selected_dates, confirm_btn
 
-# 우리가 필요로하는 코드조각들
-stock_code = get_stock_code_by_company(company_name)
-start_date = selected_dates[0].strftime(r"%Y-%m-%d")
-end_date = (selected_dates[1] + datetime.timedelta(days=1)).strftime(r"%Y-%m-%d")
-price_df = fdr.DataReader(f'KRX:{stock_code}', start_date, end_date)
+company_name, selected_dates, confirm_btn = sidebar_inputs()
 
-st.header(f'{company_name}의 현재 주가')
+if confirm_btn:
+    # 우리가 필요로하는 코드조각들
+    stock_code = get_stock_code_by_company(company_name)
+    start_date = selected_dates[0].strftime(r"%Y-%m-%d")
+    end_date = (selected_dates[1] + datetime.timedelta(days=1)).strftime(r"%Y-%m-%d")
+    price_df = fdr.DataReader(f'KRX:{stock_code}', start_date, end_date)
 
-st.dataframe(price_df)
+    st.header(f'{company_name}의 현재 주가')
 
-fig = go.Figure(data=[go.Candlestick(x=price_df.index,
-                        open=price_df['Open'],
-                        high=price_df['High'],
-                        low=price_df['Low'],
-                        close=price_df['Close'])])
-st.plotly_chart(fig)
+    st.dataframe(price_df)
 
-excel_data = BytesIO()
-price_df.to_excel(excel_data)
-st.download_button("엑셀 파일 다운로드", excel_data, file_name='stock_data.xlsx')
+    fig = go.Figure(data=[go.Candlestick(x=price_df.index,
+                            open=price_df['Open'],
+                            high=price_df['High'],
+                            low=price_df['Low'],
+                            close=price_df['Close'])])
+    st.plotly_chart(fig)
+
+    excel_data = BytesIO()
+    price_df.to_excel(excel_data)
+    st.download_button("엑셀 파일 다운로드", excel_data, file_name='stock_data.xlsx')
 
