@@ -14,4 +14,4 @@
 
 # !를 파일명 앞에 써주시면 앞의 규칙에서 제외라는 뜻입니다.
 !test.txt
-!requrements.txt
+!requirements.txt
